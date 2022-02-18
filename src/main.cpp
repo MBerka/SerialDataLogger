@@ -24,6 +24,7 @@ void setup()
   {
     // wait till port is available
   }
+
   pinMode(cardDetect, INPUT_PULLUP);
   // see if the card is present and can be initialized:
   if (startSDCard() == true)
@@ -34,7 +35,7 @@ void setup()
   File logfile = SD.open(filename, FILE_WRITE);
   if (!logfile)
   {
-    logfile.println(F("--> LOG BOOTED"));
+    logfile.println("--> LOG BOOTED");
     lastIntervalWrite = millis();
   }
 }
@@ -48,7 +49,7 @@ void loop() {
     if (logfile)
     {
       logfile.print("> ");
-      logfile.println((char *)buffer);
+      logfile.println(buffer);
       Serial.println(F("Log file updated!"));
     }
     else
@@ -74,13 +75,13 @@ void loop() {
 boolean startSDCard() {
   // Wait until the card is inserted:
   while (digitalRead(cardDetect) == LOW) {
-    Serial.println("Waiting for card...");
+    Serial.println(F("Waiting for card..."));
     delay(2000);
   }
 
   // wait until the card initialized successfully:
   while (!SD.begin(chipSelect)) {
-    Serial.println("Card failed");
+    Serial.println(F("Card failed"));
     delay(2000);
   }
   return true;
