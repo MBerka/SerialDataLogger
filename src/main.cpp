@@ -12,7 +12,7 @@ uint32_t lastIntervalWrite{0};
 char *filename PROGMEM = "/serial.log";
 
 // buffer to hold serial data
-char buffer[256];
+char buffer[512];
 
 boolean startSDCard();
 
@@ -20,7 +20,7 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  while(!Serial)
+  while (!Serial)
   {
     // wait till port is available
   }
@@ -37,10 +37,12 @@ void setup()
   {
     logfile.println("--> LOG BOOTED");
     lastIntervalWrite = millis();
+    logfile.flush();
   }
 }
 
-void loop() {
+void loop()
+{
   // put your main code here, to run repeatedly:
   if (Serial.available())
   {
@@ -51,6 +53,7 @@ void loop() {
       logfile.print("> ");
       logfile.println(buffer);
       Serial.println(F("Log file updated!"));
+      logfile.flush();
     }
     else
     { // for debugging
@@ -65,6 +68,7 @@ void loop() {
     {
       logfile.println("--> 10m PASSED");
       lastIntervalWrite = millis();
+      logfile.flush();
     }
   }
 }
@@ -72,15 +76,18 @@ void loop() {
 /**
  * detects presence of sd card before init
  */
-boolean startSDCard() {
+boolean startSDCard()
+{
   // Wait until the card is inserted:
-  while (digitalRead(cardDetect) == LOW) {
+  while (digitalRead(cardDetect) == LOW)
+  {
     Serial.println(F("Waiting for card..."));
     delay(2000);
   }
 
   // wait until the card initialized successfully:
-  while (!SD.begin(chipSelect)) {
+  while (!SD.begin(chipSelect))
+  {
     Serial.println(F("Card failed"));
     delay(2000);
   }
