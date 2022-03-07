@@ -21,10 +21,11 @@ char buffer[512];
 void lightLed();
 boolean startSDCard();
 
+// Runs once at start
 void setup()
 {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
+  // Hardware serial (pins 0 / 1) - regular Serial only goes to USB
+  Serial1.begin(115200);
   // while (!Serial);
   // {
   //   // wait till USB port is available - do not use for UART logging
@@ -34,7 +35,7 @@ void setup()
   // see if the card is present and can be initialized:
   if (startSDCard() == true)
   {
-    Serial.println(F("SD initialized!"));
+    Serial1.println(F("SD initialized!"));
     lightLed();
   }
 
@@ -50,21 +51,21 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
-  if (Serial.available())
+  if (Serial1.available())
   {
-    Serial.readBytesUntil('\n', buffer, sizeof(buffer));
+    Serial1.readBytesUntil('\n', buffer, sizeof(buffer));
     File logfile = SD.open(filename, FILE_WRITE);
     if (logfile)
     {
       logfile.print("> ");
       logfile.println(buffer);
-      Serial.println(F("Log file updated!"));
+      Serial1.println(F("Log file updated!"));
       logfile.flush();
       lightLed();
     }
     else
     { // for debugging
-      Serial.printf(PSTR("Failed to write: %s\n"), buffer);
+      Serial1.printf(PSTR("Failed to write: %s\n"), buffer);
     }
     memset(buffer, 0, sizeof(buffer));
   }
@@ -94,14 +95,14 @@ boolean startSDCard()
   // Wait until the card is inserted:
   while (digitalRead(cardDetect) == LOW)
   {
-    Serial.println(F("Waiting for card..."));
+    Serial1.println(F("Waiting for card..."));
     delay(2000);
   }
 
   // wait until the card initialized successfully:
   while (!SD.begin(chipSelect))
   {
-    Serial.println(F("Card failed"));
+    Serial1.println(F("Card failed"));
     delay(2000);
   }
   return true;
