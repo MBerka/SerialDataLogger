@@ -21,11 +21,16 @@ char buffer[512];
 void lightLed();
 boolean startSDCard();
 
+// File on SD card that is open for writing
+File logfile;
+
 // Runs once at start
 void setup()
 {
   // Hardware serial (pins 0 / 1) - regular Serial only goes to USB
   Serial1.begin(115200);
+  // For debugging only
+  Serial.begin(115200);
   // while (!Serial);
   // {
   //   // wait till USB port is available - do not use for UART logging
@@ -35,14 +40,14 @@ void setup()
   // see if the card is present and can be initialized:
   if (startSDCard() == true)
   {
-    Serial1.println(F("SD initialized!"));
+    Serial.println(F("SD initialized!"));
     lightLed();
   }
 
   File logfile = SD.open(filename, FILE_WRITE);
   if (logfile)
   {
-    logfile.println("--> LOG BOOTED");
+    logfile.println("> LOG BOOTED");
     lastIntervalWrite = millis();
     logfile.flush();
   }
@@ -54,33 +59,27 @@ void loop()
   if (Serial1.available())
   {
     Serial1.readBytesUntil('\n', buffer, sizeof(buffer));
-    File logfile = SD.open(filename, FILE_WRITE);
-    if (logfile)
+    if (!logfile.print(buffer))
     {
-      logfile.print("> ");
-      logfile.println(buffer);
-      Serial1.println(F("Log file updated!"));
-      logfile.flush();
-      lightLed();
+      Serial.printf(PSTR("Failed to write: ")); // for debugging
     }
-    else
-    { // for debugging
-      Serial1.printf(PSTR("Failed to write: %s\n"), buffer);
-    }
+    Serial.print(buffer);
+    lightLed();
     memset(buffer, 0, sizeof(buffer));
   }
-  if (millis() - lastIntervalWrite > 600e3)
+  else if (millis() - lastIntervalWrite > 600e3)
   {
-    File logfile = SD.open(filename, FILE_WRITE);
+    Serial.println("> 10m PASSED");
+    logfile.close(); // Periodically try reopening in case card was removed and put back in.
+    logfile = SD.open(filename, FILE_WRITE);
     if (logfile)
     {
-      logfile.println("--> 10m PASSED");
+      logfile.println("> 10m PASSED");
       lastIntervalWrite = millis();
-      logfile.flush();
       lightLed();
     }
   }
-  if (lastLedOn && millis() - lastLedOn > 1e3)
+  else if (lastLedOn && millis() - lastLedOn > 1e3)
   {
     digitalWrite(GREEN_LED, LOW);
     lastLedOn = 0;
@@ -95,14 +94,14 @@ boolean startSDCard()
   // Wait until the card is inserted:
   while (digitalRead(cardDetect) == LOW)
   {
-    Serial1.println(F("Waiting for card..."));
+    Serial.println(F("Waiting for card..."));
     delay(2000);
   }
 
   // wait until the card initialized successfully:
   while (!SD.begin(chipSelect))
   {
-    Serial1.println(F("Card failed"));
+    Serial.println(F("Card failed"));
     delay(2000);
   }
   return true;
