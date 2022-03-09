@@ -36,6 +36,8 @@ void setup()
   //   // wait till USB port is available - do not use for UART logging
   // }
 
+  pinMode(GREEN_LED, OUTPUT); // Otherwise, LED shines only dimly
+
   pinMode(cardDetect, INPUT_PULLUP);
   // see if the card is present and can be initialized:
   if (startSDCard() == true)
