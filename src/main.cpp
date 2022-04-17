@@ -16,7 +16,7 @@ uint32_t lastLedOn{0};
 char *filename PROGMEM = "/serial.log";
 
 // buffer to hold serial data
-char buffer[512];
+char buffer[513];
 
 void lightLed();
 boolean startSDCard();
@@ -60,7 +60,7 @@ void loop()
   // put your main code here, to run repeatedly:
   if (Serial1.available())
   {
-    Serial1.readBytesUntil('\n', buffer, sizeof(buffer));
+    Serial1.readBytesUntil('\n', buffer, sizeof(buffer) - 1);
     if (!logfile.print(buffer))
     {
       Serial.printf(PSTR("Failed to write: ")); // for debugging
