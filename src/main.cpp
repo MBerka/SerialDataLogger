@@ -46,7 +46,7 @@ void setup()
     lightLed();
   }
 
-  File logfile = SD.open(filename, FILE_WRITE);
+  logfile = SD.open(filename, FILE_WRITE);
   if (logfile)
   {
     logfile.println("> LOG BOOTED");
@@ -61,11 +61,13 @@ void loop()
   if (Serial1.available())
   {
     Serial1.readBytesUntil('\n', buffer, sizeof(buffer) - 1);
+    Serial.printf(PSTR("received: %s\n"), buffer);
+
     if (!logfile.print(buffer))
     {
-      Serial.printf(PSTR("Failed to write: ")); // for debugging
+      Serial.printf(PSTR("Failed to print!\n")); // for debugging
     }
-    Serial.print(buffer);
+    logfile.flush();
     lightLed();
     memset(buffer, 0, sizeof(buffer));
   }
